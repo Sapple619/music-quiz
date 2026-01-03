@@ -146,6 +146,24 @@ export default function Home() {
           )}
         </div>
 
+        {/* Debug Info - 디버깅 후 삭제 */}
+        {user && (
+          <div className="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-sm">
+            <p className="text-yellow-400 font-bold mb-2">🔧 디버그 정보:</p>
+            <p className="text-gray-300">내 UID: <code className="bg-black/30 px-2 py-1 rounded">{user.uid}</code></p>
+            <p className="text-gray-300">내 Email: <code className="bg-black/30 px-2 py-1 rounded">{user.email}</code></p>
+            <p className="text-gray-300 mt-2">문제집 creatorId 목록:</p>
+            <ul className="ml-4">
+              {books.map(book => (
+                <li key={book.docId} className="text-gray-400">
+                  {book.title}: <code className="bg-black/30 px-2 py-1 rounded">{book.creatorId || '없음'}</code>
+                  {book.creatorId === user.uid ? ' ✅ 일치' : ' ❌ 불일치'}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Books List */}
         <section>
           <h2 className="text-2xl font-bold mb-6">📚 문제집</h2>
