@@ -1,24 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { onAuthChange } from '@/lib/firebase-client';
+import { User } from 'firebase/auth';
 
 export default function CreateBookPage() {
     const router = useRouter();
     const [title, setTitle] = useState('');
     const [loading, setLoading] = useState(false);
+    const [user, setUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        const unsubscribe = onAuthChange((u) => {
+            setUser(u);
+        });
+        return () => unsubscribe();
+    }, []);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         if (!title.trim()) return;
+        if (!user) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
 
         setLoading(true);
         try {
             const res = await fetch('/api/books', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: title.trim() }),
+                body: JSON.stringify({
+                    title: title.trim(),
+                    creatorId: user.uid,
+                    creatorEmail: user.email,
+                }),
             });
 
             if (res.ok) {

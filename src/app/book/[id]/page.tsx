@@ -138,16 +138,25 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                     </p>
                 </div>
 
-                {quizzes.length > 0 && (
-                    <div className="text-center mb-8">
+                {/* Action buttons */}
+                <div className="flex flex-wrap justify-center gap-4 mb-8">
+                    {quizzes.length > 0 && (
                         <Link
                             href={`/play/${bookId}`}
                             className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl font-bold text-lg shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all hover:-translate-y-1"
                         >
                             ▶️ 플레이 시작
                         </Link>
-                    </div>
-                )}
+                    )}
+                    {(isAdmin || (user && bookCreatorId && user.uid === bookCreatorId)) && (
+                        <Link
+                            href={`/create?bookId=${bookId}&bookTitle=${encodeURIComponent(bookTitle)}`}
+                            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl font-bold text-lg shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transition-all hover:-translate-y-1"
+                        >
+                            ➕ 퀴즈 추가
+                        </Link>
+                    )}
+                </div>
 
                 {/* Quiz count info for non-authorized users */}
                 {!canViewQuizzes && !loading && quizzes.length > 0 && (
