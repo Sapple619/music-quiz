@@ -284,7 +284,7 @@ function CreateQuizContent() {
                 </div>
 
                 {/* Step 3: Save */}
-                <div className={`bg-white/5 border border-white/10 rounded-2xl p-6 ${!audioBlob ? 'opacity-50 pointer-events-none' : ''}`}>
+                <div className={`bg-white/5 border border-white/10 rounded-2xl p-6 ${!(audioBlob || existingAudioData) ? 'opacity-50 pointer-events-none' : ''}`}>
                     <div className="flex items-center gap-3 mb-4">
                         <span className="w-8 h-8 flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 rounded-full font-bold">3</span>
                         <h3 className="font-bold text-lg">퀴즈 저장</h3>
