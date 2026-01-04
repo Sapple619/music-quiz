@@ -1,8 +1,27 @@
-// Quizzes API - PUT (update) and DELETE by ID
+// Quizzes API - GET (single), PUT (update) and DELETE by ID
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 
 const QUIZ_COLLECTION = 'quizzes';
+
+export async function GET(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const { id } = await params;
+        const doc = await adminDb.collection(QUIZ_COLLECTION).doc(id).get();
+
+        if (!doc.exists) {
+            return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
+        }
+
+        return NextResponse.json({ ...doc.data(), docId: doc.id });
+    } catch (error) {
+        console.error('Failed to fetch quiz:', error);
+        return NextResponse.json({ error: 'Failed to fetch quiz' }, { status: 500 });
+    }
+}
 
 export async function PUT(
     request: NextRequest,
@@ -11,7 +30,7 @@ export async function PUT(
     try {
         const { id } = await params;
         const body = await request.json();
-        const { title, answer, hint } = body;
+        const { title, answer, hint, youtubeUrl, audioData } = body;
 
         const updates: any = {
             updatedAt: new Date().toISOString(),
@@ -25,6 +44,8 @@ export async function PUT(
             updates.answers = answers; // All valid answers
         }
         if (hint !== undefined) updates.hint = hint;
+        if (youtubeUrl !== undefined) updates.youtubeUrl = youtubeUrl;
+        if (audioData !== undefined) updates.audioData = audioData;
 
         await adminDb.collection(QUIZ_COLLECTION).doc(id).update(updates);
 

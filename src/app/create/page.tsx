@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, Suspense } from 'react';
+import { useState, useRef, Suspense, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -9,6 +9,8 @@ function CreateQuizContent() {
     const searchParams = useSearchParams();
     const bookId = searchParams.get('bookId');
     const bookTitle = searchParams.get('bookTitle');
+    const editId = searchParams.get('editId');
+    const isEditMode = !!editId;
 
     const [youtubeUrl, setYoutubeUrl] = useState('');
     const [videoId, setVideoId] = useState<string | null>(null);
@@ -19,11 +21,44 @@ function CreateQuizContent() {
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [recordingTime, setRecordingTime] = useState('00:00');
+    const [existingAudioData, setExistingAudioData] = useState<string | null>(null);
+    const [originalBookId, setOriginalBookId] = useState<string | null>(null);
 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const startTimeRef = useRef<number>(0);
+
+    // Load existing quiz data in edit mode
+    useEffect(() => {
+        if (editId) {
+            fetchQuizData();
+        }
+    }, [editId]);
+
+    async function fetchQuizData() {
+        try {
+            const res = await fetch(`/api/quizzes/${editId}`);
+            if (res.ok) {
+                const quiz = await res.json();
+                // Populate form with existing data
+                setYoutubeUrl(quiz.youtubeUrl || '');
+                if (quiz.youtubeUrl) {
+                    const id = extractVideoId(quiz.youtubeUrl);
+                    if (id) setVideoId(id);
+                }
+                // Join answers array back to comma-separated string
+                const answerStr = quiz.answers ? quiz.answers.join(', ') : quiz.answer;
+                setAnswer(answerStr || '');
+                setHint(quiz.hint || '');
+                setExistingAudioData(quiz.audioData || null);
+                setAudioUrl(quiz.audioData || null);
+                setOriginalBookId(quiz.bookId || null);
+            }
+        } catch (error) {
+            console.error('Failed to fetch quiz:', error);
+        }
+    }
 
     function extractVideoId(url: string) {
         const patterns = [
@@ -97,41 +132,72 @@ function CreateQuizContent() {
     }
 
     async function handleSubmit() {
-        if (!audioBlob || !answer.trim() || !videoId) {
+        // In edit mode, allow using existing audio
+        const hasAudio = audioBlob || existingAudioData;
+        if (!hasAudio || !answer.trim() || !videoId) {
             alert('YouTube 영상, 녹음, 정답이 모두 필요합니다.');
             return;
         }
 
         setLoading(true);
         try {
-            const audioData = await blobToBase64(audioBlob);
+            // Use new audio if recorded, otherwise use existing
+            const audioData = audioBlob ? await blobToBase64(audioBlob) : existingAudioData;
 
-            const res = await fetch('/api/quizzes', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    title: answer.trim(),
-                    answer: answer.trim(),
-                    hint: hint.trim(),
-                    youtubeUrl,
-                    audioData,
-                    bookId,
-                }),
-            });
+            if (isEditMode && editId) {
+                // Update existing quiz
+                const res = await fetch(`/api/quizzes/${editId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: answer.trim().split(',')[0].trim(),
+                        answer: answer.trim(),
+                        hint: hint.trim(),
+                        youtubeUrl,
+                        audioData,
+                    }),
+                });
 
-            if (res.ok) {
-                if (bookId) {
-                    router.push(`/book/${bookId}`);
+                if (res.ok) {
+                    const targetBookId = bookId || originalBookId;
+                    if (targetBookId) {
+                        router.push(`/book/${targetBookId}`);
+                    } else {
+                        router.push('/');
+                    }
                 } else {
-                    router.push('/');
+                    const data = await res.json();
+                    alert(data.error || '수정에 실패했습니다.');
                 }
             } else {
-                const data = await res.json();
-                alert(data.error || '저장에 실패했습니다.');
+                // Create new quiz
+                const res = await fetch('/api/quizzes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: answer.trim(),
+                        answer: answer.trim(),
+                        hint: hint.trim(),
+                        youtubeUrl,
+                        audioData,
+                        bookId,
+                    }),
+                });
+
+                if (res.ok) {
+                    if (bookId) {
+                        router.push(`/book/${bookId}`);
+                    } else {
+                        router.push('/');
+                    }
+                } else {
+                    const data = await res.json();
+                    alert(data.error || '저장에 실패했습니다.');
+                }
             }
         } catch (error) {
             console.error('Failed to save quiz:', error);
-            alert('저장에 실패했습니다.');
+            alert(isEditMode ? '수정에 실패했습니다.' : '저장에 실패했습니다.');
         } finally {
             setLoading(false);
         }
@@ -152,9 +218,11 @@ function CreateQuizContent() {
             <main className="pt-24 pb-16 px-6 max-w-2xl mx-auto">
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent mb-2">
-                        🎙️ {bookTitle ? `${bookTitle}에 퀴즈 추가` : '새 퀴즈 만들기'}
+                        🎙️ {isEditMode ? '퀴즈 수정' : (bookTitle ? `${bookTitle}에 퀴즈 추가` : '새 퀴즈 만들기')}
                     </h1>
-                    <p className="text-gray-400">YouTube 영상을 보면서 따라 부르고, 퀴즈로 만들어보세요!</p>
+                    <p className="text-gray-400">
+                        {isEditMode ? '퀴즈 내용을 수정하세요.' : 'YouTube 영상을 보면서 따라 부르고, 퀴즈로 만들어보세요!'}
+                    </p>
                 </div>
 
                 {/* Step 1: YouTube */}
@@ -248,7 +316,7 @@ function CreateQuizContent() {
                             disabled={loading || !answer.trim()}
                             className="w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl font-bold text-lg shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 transition-all disabled:opacity-50"
                         >
-                            {loading ? '저장 중...' : '💾 퀴즈 저장하기'}
+                            {loading ? (isEditMode ? '수정 중...' : '저장 중...') : (isEditMode ? '✏️ 퀴즈 수정하기' : '💾 퀴즈 저장하기')}
                         </button>
                     </div>
                 </div>

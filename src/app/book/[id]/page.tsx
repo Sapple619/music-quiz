@@ -295,12 +295,12 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                                                         </div>
                                                         {canEditQuiz && (
                                                             <div className="flex gap-2">
-                                                                <button
-                                                                    onClick={() => openEditModal(quiz)}
+                                                                <Link
+                                                                    href={`/create?editId=${quiz.docId}&bookId=${bookId}`}
                                                                     className="px-3 py-1.5 text-sm bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/50 transition-colors"
                                                                 >
                                                                     ✏️ 수정
-                                                                </button>
+                                                                </Link>
                                                                 <button
                                                                     onClick={() => handleDeleteQuiz(quiz.docId)}
                                                                     className="px-3 py-1.5 text-sm bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/50 transition-colors"
