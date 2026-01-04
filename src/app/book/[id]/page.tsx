@@ -208,7 +208,8 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                         ) : (
                             <div className="space-y-4">
                                 {quizzes.map((quiz, index) => {
-                                    const canEdit = user && (quiz.creatorId === user.uid || isAdmin);
+                                    // 문제집 제작자, 퀴즈 제작자, 관리자 모두 수정 가능
+                                    const canEditQuiz = isAdmin || (user && bookCreatorId && user.uid === bookCreatorId) || (user && quiz.creatorId === user.uid);
                                     return (
                                         <div
                                             key={quiz.docId}
@@ -226,7 +227,7 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                                                         <p className="text-sm text-gray-500 ml-10">💡 {quiz.hint}</p>
                                                     )}
                                                 </div>
-                                                {canEdit && (
+                                                {canEditQuiz && (
                                                     <div className="flex gap-2">
                                                         <button
                                                             onClick={() => openEditModal(quiz)}
