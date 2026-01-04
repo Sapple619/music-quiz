@@ -36,6 +36,8 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
     const [isEditingBook, setIsEditingBook] = useState(false);
     const [editBookTitle, setEditBookTitle] = useState('');
     const [editBookDescription, setEditBookDescription] = useState('');
+    // Quiz list toggle
+    const [showQuizList, setShowQuizList] = useState(false);
 
     useEffect(() => {
         const unsubscribe = onAuthChange((u) => {
@@ -250,48 +252,70 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                                 <p>아직 퀴즈가 없습니다. 퀴즈를 추가해주세요!</p>
                             </div>
                         ) : (
-                            <div className="space-y-4">
-                                {quizzes.map((quiz, index) => {
-                                    // 문제집 제작자, 퀴즈 제작자, 관리자 모두 수정 가능
-                                    const canEditQuiz = isAdmin || (user && bookCreatorId && user.uid === bookCreatorId) || (user && quiz.creatorId === user.uid);
-                                    return (
-                                        <div
-                                            key={quiz.docId}
-                                            className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-purple-500/50 transition-colors"
-                                        >
-                                            <div className="flex items-center justify-between gap-4">
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-3 mb-1">
-                                                        <span className="w-7 h-7 flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-sm font-bold">
-                                                            {index + 1}
-                                                        </span>
-                                                        <span className="font-semibold">{quiz.answer}</span>
+                            <>
+                                {/* Collapsible quiz list header */}
+                                <button
+                                    onClick={() => setShowQuizList(!showQuizList)}
+                                    className="w-full py-4 px-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors flex items-center justify-between"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-2xl">🎵</span>
+                                        <span className="font-semibold">퀴즈 목록</span>
+                                        <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded-full text-sm font-bold">
+                                            {quizzes.length}개
+                                        </span>
+                                    </div>
+                                    <span className={`text-xl transition-transform ${showQuizList ? 'rotate-180' : ''}`}>
+                                        ▼
+                                    </span>
+                                </button>
+
+                                {/* Quiz list content */}
+                                {showQuizList && (
+                                    <div className="space-y-4 mt-4">
+                                        {quizzes.map((quiz, index) => {
+                                            // 문제집 제작자, 퀴즈 제작자, 관리자 모두 수정 가능
+                                            const canEditQuiz = isAdmin || (user && bookCreatorId && user.uid === bookCreatorId) || (user && quiz.creatorId === user.uid);
+                                            return (
+                                                <div
+                                                    key={quiz.docId}
+                                                    className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-purple-500/50 transition-colors"
+                                                >
+                                                    <div className="flex items-center justify-between gap-4">
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-3 mb-1">
+                                                                <span className="w-7 h-7 flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-sm font-bold">
+                                                                    {index + 1}
+                                                                </span>
+                                                                <span className="font-semibold">{quiz.answer}</span>
+                                                            </div>
+                                                            {quiz.hint && (
+                                                                <p className="text-sm text-gray-500 ml-10">💡 {quiz.hint}</p>
+                                                            )}
+                                                        </div>
+                                                        {canEditQuiz && (
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => openEditModal(quiz)}
+                                                                    className="px-3 py-1.5 text-sm bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30"
+                                                                >
+                                                                    ✏️ 수정
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDeleteQuiz(quiz.docId)}
+                                                                    className="px-3 py-1.5 text-sm bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30"
+                                                                >
+                                                                    🗑️ 삭제
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    {quiz.hint && (
-                                                        <p className="text-sm text-gray-500 ml-10">💡 {quiz.hint}</p>
-                                                    )}
                                                 </div>
-                                                {canEditQuiz && (
-                                                    <div className="flex gap-2">
-                                                        <button
-                                                            onClick={() => openEditModal(quiz)}
-                                                            className="px-3 py-1.5 text-sm bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30"
-                                                        >
-                                                            ✏️ 수정
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteQuiz(quiz.docId)}
-                                                            className="px-3 py-1.5 text-sm bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30"
-                                                        >
-                                                            🗑️ 삭제
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </>
                         )}
                     </>
                 )}
