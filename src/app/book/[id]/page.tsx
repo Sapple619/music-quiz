@@ -279,7 +279,7 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                                             return (
                                                 <div
                                                     key={quiz.docId}
-                                                    className="bg-white/5 border border-white/10 rounded-xl p-4 hover:border-purple-500/50 transition-colors"
+                                                    className="bg-white/5 border border-white/10 rounded-xl p-4"
                                                 >
                                                     <div className="flex items-center justify-between gap-4">
                                                         <div className="flex-1 min-w-0">
