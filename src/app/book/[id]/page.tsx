@@ -23,6 +23,7 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
     const router = useRouter();
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [bookTitle, setBookTitle] = useState('문제집');
+    const [bookDescription, setBookDescription] = useState('');
     const [bookCreatorId, setBookCreatorId] = useState<string | null>(null);
     const [isPrivate, setIsPrivate] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -31,6 +32,10 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
     const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
     const [editAnswer, setEditAnswer] = useState('');
     const [editHint, setEditHint] = useState('');
+    // Book editing states
+    const [isEditingBook, setIsEditingBook] = useState(false);
+    const [editBookTitle, setEditBookTitle] = useState('');
+    const [editBookDescription, setEditBookDescription] = useState('');
 
     useEffect(() => {
         const unsubscribe = onAuthChange((u) => {
@@ -52,6 +57,7 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
             const book = books.find((b: any) => b.docId === bookId);
             if (book) {
                 setBookTitle(book.title);
+                setBookDescription(book.description || '');
                 setBookCreatorId(book.creatorId || null);
                 setIsPrivate(book.isPrivate || false);
             }
@@ -111,6 +117,30 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
         }
     }
 
+    function openBookEditModal() {
+        setEditBookTitle(bookTitle);
+        setEditBookDescription(bookDescription);
+        setIsEditingBook(true);
+    }
+
+    async function handleSaveBookEdit() {
+        try {
+            await fetch(`/api/books/${bookId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: editBookTitle.trim(),
+                    description: editBookDescription.trim(),
+                }),
+            });
+            setBookTitle(editBookTitle.trim());
+            setBookDescription(editBookDescription.trim());
+            setIsEditingBook(false);
+        } catch (error) {
+            console.error('Failed to update book:', error);
+        }
+    }
+
     // Check if current user can view quiz list (admin or book creator)
     const canViewQuizzes = isAdmin || (user && bookCreatorId && user.uid === bookCreatorId);
 
@@ -132,10 +162,24 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                 </button>
 
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent mb-2">
-                        📚 {bookTitle}
-                    </h1>
-                    <p className="text-gray-400">
+                    <div className="flex items-center justify-center gap-3 mb-2">
+                        <h1 className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+                            📚 {bookTitle}
+                        </h1>
+                        {canViewQuizzes && (
+                            <button
+                                onClick={openBookEditModal}
+                                className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                title="문제집 수정"
+                            >
+                                ✏️
+                            </button>
+                        )}
+                    </div>
+                    {bookDescription && (
+                        <p className="text-gray-300 mb-2">{bookDescription}</p>
+                    )}
+                    <p className="text-gray-400 text-sm">
                         {canViewQuizzes ? '퀴즈를 확인하고 수정할 수 있습니다.' : '플레이 버튼을 눌러 퀴즈를 시작하세요!'}
                     </p>
                 </div>
@@ -291,6 +335,51 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                                 취소
                             </button>
                             <button onClick={handleSaveEdit} className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl font-semibold hover:opacity-90">
+                                저장
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Book Edit Modal */}
+            {isEditingBook && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setIsEditingBook(false)} />
+                    <div className="relative w-full max-w-md bg-[#12121a] border border-white/10 rounded-2xl overflow-hidden">
+                        <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-4 flex items-center justify-between">
+                            <h2 className="text-xl font-bold">📚 문제집 수정</h2>
+                            <button onClick={() => setIsEditingBook(false)} className="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full hover:bg-white/30">
+                                ✕
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-2">문제집 이름</label>
+                                <input
+                                    type="text"
+                                    value={editBookTitle}
+                                    onChange={(e) => setEditBookTitle(e.target.value)}
+                                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none"
+                                    placeholder="문제집 이름"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-2">설명 (선택)</label>
+                                <textarea
+                                    value={editBookDescription}
+                                    onChange={(e) => setEditBookDescription(e.target.value)}
+                                    className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none resize-none"
+                                    placeholder="문제집 설명"
+                                    rows={3}
+                                />
+                            </div>
+                        </div>
+                        <div className="px-6 py-4 bg-black/20 flex justify-end gap-3">
+                            <button onClick={() => setIsEditingBook(false)} className="px-4 py-2 text-gray-400 hover:text-white">
+                                취소
+                            </button>
+                            <button onClick={handleSaveBookEdit} className="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl font-semibold hover:opacity-90">
                                 저장
                             </button>
                         </div>
