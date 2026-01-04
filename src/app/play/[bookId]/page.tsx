@@ -8,6 +8,7 @@ interface Quiz {
     docId: string;
     title: string;
     answer: string;
+    answers?: string[]; // Multiple valid answers
     hint?: string;
     audioData: string;
     youtubeUrl: string;
@@ -74,15 +75,19 @@ export default function PlayPage({ params }: { params: Promise<{ bookId: string 
         }
     }
 
-    function checkAnswer(userAns: string, correctAns: string) {
+    function checkAnswer(userAns: string, quiz: Quiz) {
         const normalize = (str: string) => str.toLowerCase().trim().replace(/\s+/g, ' ');
-        return normalize(userAns) === normalize(correctAns);
+        const normalizedUserAns = normalize(userAns);
+
+        // Check against all valid answers
+        const validAnswers = quiz.answers || [quiz.answer];
+        return validAnswers.some(ans => normalize(ans) === normalizedUserAns);
     }
 
     function handleSubmit() {
         if (!userAnswer.trim()) return;
         const quiz = quizzes[currentIndex];
-        const correct = checkAnswer(userAnswer, quiz.answer);
+        const correct = checkAnswer(userAnswer, quiz);
         setIsCorrect(correct);
         setShowResult(true);
         setResults([...results, { title: quiz.title, answer: quiz.answer, userAnswer, isCorrect: correct }]);

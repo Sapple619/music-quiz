@@ -18,7 +18,12 @@ export async function PUT(
         };
 
         if (title !== undefined) updates.title = title;
-        if (answer !== undefined) updates.answer = answer;
+        if (answer !== undefined) {
+            // Parse multiple answers (comma-separated)
+            const answers = answer.split(',').map((a: string) => a.trim()).filter((a: string) => a);
+            updates.answer = answers[0]; // Primary answer
+            updates.answers = answers; // All valid answers
+        }
         if (hint !== undefined) updates.hint = hint;
 
         await adminDb.collection(QUIZ_COLLECTION).doc(id).update(updates);

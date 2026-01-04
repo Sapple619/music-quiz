@@ -44,10 +44,14 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Audio too large, keep under 30 seconds' }, { status: 400 });
         }
 
+        // Parse multiple answers (comma-separated)
+        const answers = answer.split(',').map((a: string) => a.trim()).filter((a: string) => a);
+
         const quizDoc = {
             id: `quiz_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            title: title || answer,
-            answer,
+            title: title || answers[0],
+            answer: answers[0], // Primary answer for display
+            answers, // All valid answers
             hint: hint || '',
             youtubeUrl,
             audioData,
