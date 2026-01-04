@@ -76,7 +76,8 @@ export default function PlayPage({ params }: { params: Promise<{ bookId: string 
     }
 
     function checkAnswer(userAns: string, quiz: Quiz) {
-        const normalize = (str: string) => str.toLowerCase().trim().replace(/\s+/g, ' ');
+        // Remove all spaces and convert to lowercase for comparison
+        const normalize = (str: string) => str.toLowerCase().replace(/\s/g, '');
         const normalizedUserAns = normalize(userAns);
 
         // Check against all valid answers
