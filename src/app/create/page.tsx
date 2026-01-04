@@ -231,7 +231,7 @@ function CreateQuizContent() {
                                 placeholder="정답 (쉼표로 복수정답 입력 가능)"
                                 className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none"
                             />
-                            <p className="text-xs text-gray-500 mt-1">💡 복수 정답: 쉼표(,)로 구분 (예: 봄날, 봄날 BTS, Spring Day)</p>
+                            <p className="text-xs text-gray-500 mt-1">💡 복수 정답: 쉼표(,)로 구분 (예: 카트,카트라이더,카트 라이더)</p>
                         </div>
                         <div>
                             <label className="block text-sm text-gray-400 mb-2">힌트 (선택사항)</label>
