@@ -142,7 +142,7 @@ export default function PlayPage({ params }: { params: Promise<{ bookId: string 
                             <div key={i} className={`p-3 rounded-xl ${r.isCorrect ? 'bg-green-500/10 border border-green-500/30' : 'bg-red-500/10 border border-red-500/30'}`}>
                                 <div className="flex items-center gap-3">
                                     <span className="text-xl">{r.isCorrect ? '✅' : '❌'}</span>
-                                    <p className="font-semibold">{i + 1}. {r.title}</p>
+                                    <p className="font-semibold">문제 {i + 1}</p>
                                 </div>
                                 <div className="ml-9 mt-1 text-sm">
                                     {!r.isCorrect && (
