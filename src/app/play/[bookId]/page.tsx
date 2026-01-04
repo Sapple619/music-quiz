@@ -139,11 +139,16 @@ export default function PlayPage({ params }: { params: Promise<{ bookId: string 
                     </p>
                     <div className="space-y-2 mb-8 text-left">
                         {results.map((r, i) => (
-                            <div key={i} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
-                                <span className="text-xl">{r.isCorrect ? '✅' : '❌'}</span>
-                                <div>
+                            <div key={i} className={`p-3 rounded-xl ${r.isCorrect ? 'bg-green-500/10 border border-green-500/30' : 'bg-red-500/10 border border-red-500/30'}`}>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xl">{r.isCorrect ? '✅' : '❌'}</span>
                                     <p className="font-semibold">{i + 1}. {r.title}</p>
-                                    <p className="text-sm text-gray-400">정답: {r.answer}</p>
+                                </div>
+                                <div className="ml-9 mt-1 text-sm">
+                                    {!r.isCorrect && (
+                                        <p className="text-red-400">내 답: {r.userAnswer}</p>
+                                    )}
+                                    <p className={r.isCorrect ? 'text-green-400' : 'text-gray-400'}>정답: {r.answer}</p>
                                 </div>
                             </div>
                         ))}
