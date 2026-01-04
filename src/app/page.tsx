@@ -198,7 +198,7 @@ export default function Home() {
                           {canAddQuiz && (
                             <Link
                               href={`/create?bookId=${book.docId}&bookTitle=${encodeURIComponent(book.title)}`}
-                              className="flex-1 text-center py-2 text-sm bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30"
+                              className="flex-1 text-center py-2 text-sm bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/50 transition-colors"
                               onClick={(e) => e.stopPropagation()}
                             >
                               ➕ 퀴즈 추가
@@ -207,7 +207,7 @@ export default function Home() {
                           {canDelete && (
                             <button
                               onClick={(e) => { e.preventDefault(); handleDeleteBook(book.docId); }}
-                              className="flex-1 py-2 text-sm bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30"
+                              className="flex-1 py-2 text-sm bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/50 transition-colors"
                             >
                               🗑️ 삭제
                             </button>
