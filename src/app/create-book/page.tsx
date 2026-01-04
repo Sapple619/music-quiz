@@ -9,7 +9,7 @@ import { User } from 'firebase/auth';
 export default function CreateBookPage() {
     const router = useRouter();
     const [title, setTitle] = useState('');
-    const [isPrivate, setIsPrivate] = useState(false);
+    const [isPrivate, setIsPrivate] = useState(true);
     const [loading, setLoading] = useState(false);
     const [user, setUser] = useState<User | null>(null);
 
