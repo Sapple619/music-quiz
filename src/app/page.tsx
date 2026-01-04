@@ -8,6 +8,7 @@ import { User } from 'firebase/auth';
 interface Book {
   docId: string;
   title: string;
+  description?: string;
   createdAt: string;
   creatorId?: string;
   isPrivate?: boolean;
@@ -183,6 +184,9 @@ export default function Home() {
                           {book.isPrivate && <span className="text-sm">🔒</span>}
                           {book.title}
                         </h3>
+                        {book.description && (
+                          <p className="text-sm text-gray-400 mb-2 line-clamp-2">{book.description}</p>
+                        )}
                         <p className="text-sm text-gray-500 mb-1">📅 {formatDate(book.createdAt)}</p>
                         <p className="text-purple-400 font-semibold">🎵 {quizCounts[book.docId] || 0}문제</p>
                         <span className="inline-block mt-4 px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-xs font-semibold">

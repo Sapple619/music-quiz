@@ -26,7 +26,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { title, creatorId, creatorEmail, isPrivate } = body;
+        const { title, description, creatorId, creatorEmail, isPrivate } = body;
 
         if (!title) {
             return NextResponse.json({ error: 'Title is required' }, { status: 400 });
@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
         const bookDoc = {
             id: `book_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             title,
+            description: description || '',
             quizIds: [],
             quizCount: 0,
             creatorId: creatorId || null,

@@ -9,6 +9,7 @@ import { User } from 'firebase/auth';
 export default function CreateBookPage() {
     const router = useRouter();
     const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
     const [isPrivate, setIsPrivate] = useState(true);
     const [loading, setLoading] = useState(false);
     const [user, setUser] = useState<User | null>(null);
@@ -35,6 +36,7 @@ export default function CreateBookPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     title: title.trim(),
+                    description: description.trim(),
                     creatorId: user.uid,
                     creatorEmail: user.email,
                     isPrivate,
@@ -84,6 +86,17 @@ export default function CreateBookPage() {
                             className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none text-lg"
                             placeholder="문제집 이름을 입력하세요"
                             required
+                        />
+                    </div>
+
+                    <div className="mb-6">
+                        <label className="block text-sm text-gray-400 mb-2">설명 (선택)</label>
+                        <textarea
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl focus:border-purple-500 focus:outline-none resize-none"
+                            placeholder="문제집에 대한 설명을 입력하세요"
+                            rows={3}
                         />
                     </div>
 

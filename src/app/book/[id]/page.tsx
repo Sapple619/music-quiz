@@ -173,8 +173,8 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                                     }
                                 }}
                                 className={`inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition-all hover:-translate-y-1 ${isPrivate
-                                        ? 'bg-gradient-to-r from-gray-600 to-gray-700 shadow-gray-500/30 hover:shadow-gray-500/50'
-                                        : 'bg-gradient-to-r from-yellow-500 to-orange-500 shadow-yellow-500/30 hover:shadow-yellow-500/50'
+                                    ? 'bg-gradient-to-r from-gray-600 to-gray-700 shadow-gray-500/30 hover:shadow-gray-500/50'
+                                    : 'bg-gradient-to-r from-yellow-500 to-orange-500 shadow-yellow-500/30 hover:shadow-yellow-500/50'
                                     }`}
                             >
                                 {isPrivate ? '🔓 공개로 전환' : '🔒 비공개로 전환'}

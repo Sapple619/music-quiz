@@ -11,11 +11,12 @@ export async function PUT(
     try {
         const { id } = await params;
         const body = await request.json();
-        const { isPrivate, title } = body;
+        const { isPrivate, title, description } = body;
 
         const updateData: Record<string, unknown> = {};
         if (typeof isPrivate === 'boolean') updateData.isPrivate = isPrivate;
         if (title) updateData.title = title;
+        if (typeof description === 'string') updateData.description = description;
 
         await adminDb.collection(BOOK_COLLECTION).doc(id).update(updateData);
         return NextResponse.json({ success: true });
