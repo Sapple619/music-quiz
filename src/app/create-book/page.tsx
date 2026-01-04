@@ -9,6 +9,7 @@ import { User } from 'firebase/auth';
 export default function CreateBookPage() {
     const router = useRouter();
     const [title, setTitle] = useState('');
+    const [isPrivate, setIsPrivate] = useState(false);
     const [loading, setLoading] = useState(false);
     const [user, setUser] = useState<User | null>(null);
 
@@ -36,6 +37,7 @@ export default function CreateBookPage() {
                     title: title.trim(),
                     creatorId: user.uid,
                     creatorEmail: user.email,
+                    isPrivate,
                 }),
             });
 
@@ -83,6 +85,26 @@ export default function CreateBookPage() {
                             placeholder="문제집 이름을 입력하세요"
                             required
                         />
+                    </div>
+
+                    <div className="mb-6">
+                        <label className="flex items-center gap-3 cursor-pointer group">
+                            <div className="relative">
+                                <input
+                                    type="checkbox"
+                                    checked={isPrivate}
+                                    onChange={(e) => setIsPrivate(e.target.checked)}
+                                    className="sr-only"
+                                />
+                                <div className={`w-12 h-6 rounded-full transition-colors ${isPrivate ? 'bg-purple-500' : 'bg-white/20'}`}>
+                                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform ${isPrivate ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                                </div>
+                            </div>
+                            <div>
+                                <span className="text-white font-medium">🔒 비공개</span>
+                                <p className="text-sm text-gray-500">링크를 아는 사람만 접근 가능</p>
+                            </div>
+                        </label>
                     </div>
 
                     <button

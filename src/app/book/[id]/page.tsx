@@ -24,6 +24,7 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [bookTitle, setBookTitle] = useState('문제집');
     const [bookCreatorId, setBookCreatorId] = useState<string | null>(null);
+    const [isPrivate, setIsPrivate] = useState(false);
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<User | null>(null);
     const [isAdmin, setIsAdmin] = useState(false);
@@ -52,6 +53,7 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
             if (book) {
                 setBookTitle(book.title);
                 setBookCreatorId(book.creatorId || null);
+                setIsPrivate(book.isPrivate || false);
             }
         } catch (error) {
             console.error('Failed to fetch book:', error);
@@ -149,12 +151,35 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                         </Link>
                     )}
                     {(isAdmin || (user && bookCreatorId && user.uid === bookCreatorId)) && (
-                        <Link
-                            href={`/create?bookId=${bookId}&bookTitle=${encodeURIComponent(bookTitle)}`}
-                            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl font-bold text-lg shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transition-all hover:-translate-y-1"
-                        >
-                            ➕ 퀴즈 추가
-                        </Link>
+                        <>
+                            <Link
+                                href={`/create?bookId=${bookId}&bookTitle=${encodeURIComponent(bookTitle)}`}
+                                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl font-bold text-lg shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transition-all hover:-translate-y-1"
+                            >
+                                ➕ 퀴즈 추가
+                            </Link>
+                            <button
+                                onClick={async () => {
+                                    const newPrivate = !isPrivate;
+                                    try {
+                                        await fetch(`/api/books/${bookId}`, {
+                                            method: 'PUT',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ isPrivate: newPrivate }),
+                                        });
+                                        setIsPrivate(newPrivate);
+                                    } catch (error) {
+                                        console.error('Failed to update privacy:', error);
+                                    }
+                                }}
+                                className={`inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition-all hover:-translate-y-1 ${isPrivate
+                                        ? 'bg-gradient-to-r from-gray-600 to-gray-700 shadow-gray-500/30 hover:shadow-gray-500/50'
+                                        : 'bg-gradient-to-r from-yellow-500 to-orange-500 shadow-yellow-500/30 hover:shadow-yellow-500/50'
+                                    }`}
+                            >
+                                {isPrivate ? '🔓 공개로 전환' : '🔒 비공개로 전환'}
+                            </button>
+                        </>
                     )}
                 </div>
 

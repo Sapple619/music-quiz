@@ -1,8 +1,29 @@
-// Books API - DELETE by ID
+// Books API - PUT (update) and DELETE by ID
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 
 const BOOK_COLLECTION = 'quizBooks';
+
+export async function PUT(
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const { id } = await params;
+        const body = await request.json();
+        const { isPrivate, title } = body;
+
+        const updateData: Record<string, unknown> = {};
+        if (typeof isPrivate === 'boolean') updateData.isPrivate = isPrivate;
+        if (title) updateData.title = title;
+
+        await adminDb.collection(BOOK_COLLECTION).doc(id).update(updateData);
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Failed to update book:', error);
+        return NextResponse.json({ error: 'Failed to update book' }, { status: 500 });
+    }
+}
 
 export async function DELETE(
     request: NextRequest,

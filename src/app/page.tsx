@@ -10,6 +10,7 @@ interface Book {
   title: string;
   createdAt: string;
   creatorId?: string;
+  isPrivate?: boolean;
 }
 
 interface Quiz {
@@ -161,48 +162,57 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {books.map((book) => {
-                const canDelete = user && (book.creatorId === user.uid || isAdmin);
-                const canAddQuiz = user && (book.creatorId === user.uid || isAdmin);
-                return (
-                  <div
-                    key={book.docId}
-                    className="group relative bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 hover:border-purple-500/50 hover:-translate-y-1 transition-all cursor-pointer"
-                  >
-                    <Link href={`/book/${book.docId}`} className="block">
-                      <h3 className="text-lg font-bold mb-2 group-hover:text-purple-400 transition-colors">
-                        {book.title}
-                      </h3>
-                      <p className="text-sm text-gray-500 mb-1">📅 {formatDate(book.createdAt)}</p>
-                      <p className="text-purple-400 font-semibold">🎵 {quizCounts[book.docId] || 0}문제</p>
-                      <span className="inline-block mt-4 px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-xs font-semibold">
-                        ▶️ 플레이
-                      </span>
-                    </Link>
-                    {(canDelete || canAddQuiz) && (
-                      <div className="flex gap-2 mt-4 pt-4 border-t border-white/10">
-                        {canAddQuiz && (
-                          <Link
-                            href={`/create?bookId=${book.docId}&bookTitle=${encodeURIComponent(book.title)}`}
-                            className="flex-1 text-center py-2 text-sm bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            ➕ 퀴즈 추가
-                          </Link>
-                        )}
-                        {canDelete && (
-                          <button
-                            onClick={(e) => { e.preventDefault(); handleDeleteBook(book.docId); }}
-                            className="flex-1 py-2 text-sm bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30"
-                          >
-                            🗑️ 삭제
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+              {books
+                .filter((book) => {
+                  // 비공개 문제집은 제작자/관리자만 표시
+                  if (book.isPrivate) {
+                    return user && (book.creatorId === user.uid || isAdmin);
+                  }
+                  return true;
+                })
+                .map((book) => {
+                  const canDelete = user && (book.creatorId === user.uid || isAdmin);
+                  const canAddQuiz = user && (book.creatorId === user.uid || isAdmin);
+                  return (
+                    <div
+                      key={book.docId}
+                      className="group relative bg-white/5 border border-white/10 rounded-2xl p-6 hover:bg-white/10 hover:border-purple-500/50 hover:-translate-y-1 transition-all cursor-pointer"
+                    >
+                      <Link href={`/book/${book.docId}`} className="block">
+                        <h3 className="text-lg font-bold mb-2 group-hover:text-purple-400 transition-colors flex items-center gap-2">
+                          {book.isPrivate && <span className="text-sm">🔒</span>}
+                          {book.title}
+                        </h3>
+                        <p className="text-sm text-gray-500 mb-1">📅 {formatDate(book.createdAt)}</p>
+                        <p className="text-purple-400 font-semibold">🎵 {quizCounts[book.docId] || 0}문제</p>
+                        <span className="inline-block mt-4 px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-xs font-semibold">
+                          ▶️ 플레이
+                        </span>
+                      </Link>
+                      {(canDelete || canAddQuiz) && (
+                        <div className="flex gap-2 mt-4 pt-4 border-t border-white/10">
+                          {canAddQuiz && (
+                            <Link
+                              href={`/create?bookId=${book.docId}&bookTitle=${encodeURIComponent(book.title)}`}
+                              className="flex-1 text-center py-2 text-sm bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              ➕ 퀴즈 추가
+                            </Link>
+                          )}
+                          {canDelete && (
+                            <button
+                              onClick={(e) => { e.preventDefault(); handleDeleteBook(book.docId); }}
+                              className="flex-1 py-2 text-sm bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30"
+                            >
+                              🗑️ 삭제
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
             </div>
           )}
         </section>

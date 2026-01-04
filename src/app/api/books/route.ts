@@ -26,7 +26,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { title, creatorId, creatorEmail } = body;
+        const { title, creatorId, creatorEmail, isPrivate } = body;
 
         if (!title) {
             return NextResponse.json({ error: 'Title is required' }, { status: 400 });
@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
             quizCount: 0,
             creatorId: creatorId || null,
             creatorEmail: creatorEmail || null,
+            isPrivate: isPrivate || false,
             createdAt: new Date().toISOString(),
         };
 
