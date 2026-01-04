@@ -191,7 +191,7 @@ export default function PlayPage({ params }: { params: Promise<{ bookId: string 
                         {/* Audio Player */}
                         <div className="text-center mb-6">
                             <p className="text-gray-400 mb-3">🎧 녹음된 노래를 들어보세요</p>
-                            <audio src={currentQuiz.audioData} controls className="w-full" />
+                            <audio src={currentQuiz.audioData} controls controlsList="nodownload" className="w-full" />
                         </div>
 
                         {/* Hint */}

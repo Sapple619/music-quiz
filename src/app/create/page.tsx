@@ -274,7 +274,7 @@ function CreateQuizContent() {
                         {audioUrl && (
                             <div className="w-full p-4 bg-black/20 rounded-xl text-center">
                                 <p className="text-sm text-gray-400 mb-2">🔊 녹음 미리듣기</p>
-                                <audio src={audioUrl} controls className="w-full mb-3" />
+                                <audio src={audioUrl} controls controlsList="nodownload" className="w-full mb-3" />
                                 <button onClick={() => { setAudioBlob(null); setAudioUrl(null); }} className="text-sm text-gray-400 hover:text-white">
                                     다시 녹음
                                 </button>
